@@ -48,7 +48,7 @@ def create_bucket():
         ]
     }''' % bucket_name
     
-    print(bcolors.HEADER + f"Creating a bucked with name {bcolors.BOLD}{bcolors.OKGREEN}{bucket_name}" + bcolors.ENDC)
+    print(bcolors.HEADER + f"\nCreating a bucked with name {bcolors.BOLD}{bcolors.OKGREEN}{bucket_name}" + bcolors.ENDC)
     try:
         bucket = s3.create_bucket(Bucket=bucket_name)
         s3_client = boto3.client('s3')

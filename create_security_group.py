@@ -17,9 +17,9 @@ def create_security_group(name, description):
         
         try:
             security_group_id = response['GroupId']
-            print(f"│\t└── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] Group ID: {bcolors.BOLD}{bcolors.OKGREEN}{security_group_id}{bcolors.ENDC}")
+            print(f"│\t├── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] Group ID: {bcolors.BOLD}{bcolors.OKGREEN}{security_group_id}{bcolors.ENDC}")
         except Exception as error:
-            print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot get Group ID --> {error})")
+            print(f"│\t├── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot get Group ID --> {error})")
         print(f"│\t└── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] Group description: {bcolors.BOLD}{bcolors.OKGREEN}{description}{bcolors.ENDC}")
 
         data = ec2.authorize_security_group_ingress(
