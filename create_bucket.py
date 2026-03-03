@@ -5,11 +5,19 @@ import webbrowser
 import time
 from helpers import id_generator, bcolors
 
+OK=f"{bcolors.OKGREEN}OK{bcolors.ENDC}"
+ERR=f"{bcolors.FAIL}ERR{bcolors.ENDC}"
+DONE=f"{bcolors.OKGREEN}DONE{bcolors.ENDC}"
+
+
 s3 = boto3.resource("s3")
+
+# files to be uploaded to the bucket
 files_to_upload = [
     {'name':'index.html','type':'text/html'},
     {'name':'error.html','type':'text/html'}
     ]
+#files to be downloaded and to be added to the files_to_upload array
 files_to_download = [
         {"link":"http://devops.setudemo.net/logo.jpg"}
     ]
@@ -17,14 +25,12 @@ files_to_download = [
 def create_bucket():
     bucket_name = 'okorniienko-' + str(id_generator())
     
-    # checking if exist
+    # checking if bucket exist
     buckets = []
     for bucket in s3.buckets.all():
         buckets.append(bucket.name)
     while bucket_name in buckets:
-        # print("This bucket name is already exist, generating a new one...")
         bucket_name = 'okorniienko-' + str(id_generator())
-        # print("New bucket name: ", bucket_name)
     
     website_configuration = {
         'ErrorDocument': {'Key': 'error.html'},
@@ -48,7 +54,7 @@ def create_bucket():
         ]
     }''' % bucket_name
     
-    print(bcolors.HEADER + f"\nCreating a bucked with name {bcolors.BOLD}{bcolors.OKGREEN}{bucket_name}" + bcolors.ENDC)
+    print("\n╭ " + bcolors.HEADER + f"Creating a bucked with name {bcolors.BOLD}{bcolors.OKGREEN}{bucket_name}" + bcolors.ENDC)
     try:
         bucket = s3.create_bucket(Bucket=bucket_name)
         s3_client = boto3.client('s3')
@@ -56,28 +62,28 @@ def create_bucket():
         print("├── Deleting public access block...")
         try:
             s3_client.delete_public_access_block(Bucket=bucket_name)
-            print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Access block deleted")
+            print(f"│\t└── [ {OK} ] Access block deleted")
         except Exception as error:
-            print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Access block deletion failed --> {error}")
+            print(f"│\t└── [ {ERR} ] Access block deletion failed --> {error}")
             
         print("├── Applying policy...")
         try:
             s3_client.put_bucket_policy(Bucket=bucket_name, Policy=bucket_policy)
-            print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Policy applied")
+            print(f"│\t└── [ {OK} ] Policy applied")
         except Exception as error:
-            print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Policy application failed --> {error}")
+            print(f"│\t└── [ {ERR} ] Policy application failed --> {error}")
         print("├── Enabling bucket website...")
         try:
             bucket_website = s3.BucketWebsite(bucket_name)
-            print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Bucket website enabled")
+            print(f"│\t└── [ {OK} ] Bucket website enabled")
         except Exception as error:
-            print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Website enable failed --> {error}")
+            print(f"│\t└── [ {ERR} ] Website enable failed --> {error}")
         print("├── Applying website configuration...")
         try:
             response = bucket_website.put(WebsiteConfiguration=website_configuration)
-            print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Website configuration applied")
+            print(f"│\t└── [ {OK} ] Website configuration applied")
         except Exception as error:
-            print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Website configuration apply failed --> {error}")
+            print(f"│\t└── [ {ERR} ] Website configuration apply failed --> {error}")
  
              
         print("├── Downloading required files...")
@@ -88,9 +94,9 @@ def create_bucket():
                 file_type = subprocess.run(f'curl --silent --head {link['link']} | grep Content-Type', shell=True, capture_output=True, text=True).stdout.split('Content-Type: ')[-1].strip()
                 get_file = subprocess.run(["curl", "--silent", "-L", "-o", f"www/{file_name}", f"{link['link']}"])
                 files_to_upload.append({'name':f'{file_name}','type':f'{file_type}'})
-                print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Checking file at {link['link']}")
+                print(f"│\t└── [ {OK} ] Checking file at {link['link']}")
             else:
-                print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Checking file at {link['link']} --> {bcolors.FAIL}Not found{bcolors.ENDC}") 
+                print(f"│\t└── [ {ERR} ] Checking file at {link['link']} --> {bcolors.FAIL}Not found{bcolors.ENDC}") 
             
             
         print("├── Uploading files to the bucket...")
@@ -99,21 +105,21 @@ def create_bucket():
                 result = s3.Object(bucket_name, f'{file['name']}').put(Body=open(f'www/{file['name']}', 'rb'), ContentType=f'{file['type']}')
                 if result['ResponseMetadata']['HTTPStatusCode'] == 200:
                     if index == len(files_to_upload)-1:
-                        print(f"│\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Uploading {file['name']}")
+                        print(f"│\t└── [ {OK} ] Uploading {file['name']}")
                     else:
-                        print(f"│\t├── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Uploading {file['name']}")
+                        print(f"│\t├── [ {OK} ] Uploading {file['name']}")
                 else:
-                    print(f"│\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Uploading {file['name']}")
+                    print(f"│\t└── [ {ERR} ] Uploading {file['name']}")
             except Exception as error:
-                print(f"[ {bcolors.FAIL}ERR{bcolors.ENDC} ] Uploading {file['name']} --> ", error)
+                print(f"[ {ERR} ] Uploading {file['name']} --> ", error)
                 
         website_url = "http://%s.s3-website-%s.amazonaws.com" % (bucket_name, boto3.Session().region_name)
-        print(f"└── [ {bcolors.OKGREEN}DONE{bcolors.ENDC} ] The bucket has been created and configured for the website hosting. \nAccess it at: {bcolors.OKBLUE}" + website_url + f"{bcolors.ENDC}")
+        print(f"└── [ {DONE} ] The bucket has been created and configured for the website hosting. \nAccess it at: {bcolors.OKBLUE}" + website_url + f"{bcolors.ENDC}")
         webbrowser.open(website_url)
         return website_url
     
     except Exception as error:
-        print(f"└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Error creating the bucket --> {error}\n" + bcolors.ENDC)
+        print(f"└── [ {ERR} ] Error creating the bucket --> {error}\n" + bcolors.ENDC)
         
 if __name__ == "__main__":
     create_bucket()

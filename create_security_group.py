@@ -5,10 +5,14 @@
 import boto3
 from helpers import bcolors
 
+INFO=f"{bcolors.OKBLUE}INFO{bcolors.ENDC}"
+ERR=f"{bcolors.FAIL}ERR{bcolors.ENDC}"
+DONE=f"{bcolors.OKGREEN}DONE{bcolors.ENDC}"
+
 ec2 = boto3.client("ec2")
 
 def create_security_group(name, description):
-    print(bcolors.HEADER + f"\nCreating a security group with name {bcolors.BOLD}{bcolors.OKGREEN}{name}" + bcolors.ENDC)
+    print("\n╭ " + bcolors.HEADER + f"Creating a security group with name {bcolors.BOLD}{bcolors.OKGREEN}{name}" + bcolors.ENDC)
     try:
         response = ec2.create_security_group(
             Description=description,
@@ -17,10 +21,10 @@ def create_security_group(name, description):
         
         try:
             security_group_id = response['GroupId']
-            print(f"│\t├── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] Group ID: {bcolors.BOLD}{bcolors.OKGREEN}{security_group_id}{bcolors.ENDC}")
+            print(f"│\t├── [ {INFO} ] Group ID: {bcolors.BOLD}{bcolors.OKGREEN}{security_group_id}{bcolors.ENDC}")
         except Exception as error:
-            print(f"│\t├── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot get Group ID --> {error})")
-        print(f"│\t└── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] Group description: {bcolors.BOLD}{bcolors.OKGREEN}{description}{bcolors.ENDC}")
+            print(f"│\t├── [ {ERR} ] Cannot get Group ID --> {error})")
+        print(f"│\t└── [ {INFO} ] Group description: {bcolors.BOLD}{bcolors.OKGREEN}{description}{bcolors.ENDC}")
 
         data = ec2.authorize_security_group_ingress(
                 GroupId=security_group_id,
@@ -34,7 +38,7 @@ def create_security_group(name, description):
                     'ToPort': 22,
                     'IpRanges': [{'CidrIp': '0.0.0.0/0'}]}
                 ])
-        print(f"└── [ {bcolors.OKGREEN}DONE{bcolors.ENDC} ] Security group {bcolors.BOLD}{bcolors.OKGREEN}{name}{bcolors.ENDC} has been created\n")
+        print(f"└── [ {DONE} ] Security group {bcolors.BOLD}{bcolors.OKGREEN}{name}{bcolors.ENDC} has been created\n")
     except Exception as error:
         print(f"└── [ {bcolors.FAIL}FAIL{bcolors.ENDC} ] Failed to create security group --> {error}\n")
 

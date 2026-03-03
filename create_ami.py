@@ -3,17 +3,17 @@
 import boto3
 import time
 from helpers import bcolors
-import subprocess
+
+OK=f"{bcolors.OKGREEN}OK{bcolors.ENDC}"
+INFO=f"{bcolors.OKBLUE}INFO{bcolors.ENDC}"
+ERR=f"{bcolors.FAIL}ERR{bcolors.ENDC}"
 
 ec2 = boto3.resource('ec2')    
 ec2_client = boto3.client('ec2')    
-image_name="assignment1_okorniienko_image"
-image_description="Image of the assignment1_okorniienko instance"
-instance_id="i-0bf36ccf6afdabf85"
 timestamp=int(time.time())
 
 def create_ami(instance_id, name, description):
-    print(f"\n{bcolors.HEADER}Creating AMI...{bcolors.ENDC}")
+    print(f"\n╭ {bcolors.HEADER}Creating AMI...{bcolors.ENDC}")
     try:
         instance = ec2.Instance(instance_id)
         image = instance.create_image(
@@ -21,14 +21,18 @@ def create_ami(instance_id, name, description):
             Description=description,
             NoReboot=True
         )
-        print(f"└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] AMI has been created")
-        print(f"\t├── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] AMI ID: {bcolors.OKBLUE}{image.id}{bcolors.ENDC}")
-        print(f"\t└── [ {bcolors.OKBLUE}INFO{bcolors.ENDC} ] AMI name: {bcolors.OKBLUE}{image.name}{bcolors.ENDC}")
+        print(f"└── [ {OK} ] AMI has been created")
+        print(f"\t├── [ {INFO} ] AMI ID: {bcolors.OKBLUE}{image.id}{bcolors.ENDC}")
+        print(f"\t└── [ {INFO} ] AMI name: {bcolors.OKBLUE}{image.name}{bcolors.ENDC}")
     except Exception as error:
-        print(f"└── [ {bcolors.FAIL}FAIL{bcolors.ENDC} ] Error creating the AMI. {error}")
+        print(f"└── [ {ERR} ] Error creating the AMI. {error}")
 
     
 if __name__ == "__main__":
+    import subprocess
+    # image_name="assignment1_okorniienko_image"
+    # image_description="Image of the assignment1_okorniienko instance"
+    # instance_id="i-0bf36ccf6afdabf85"
     # create_ami(instance_id ,image_name, image_description)
     # print(timestamp)
     # response = ec2_client.describe_images(Owners=['self'])

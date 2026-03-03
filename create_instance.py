@@ -9,12 +9,17 @@ import subprocess
 import requests
 import sys
 from helpers import bcolors
+
+OK=f"{bcolors.OKGREEN}OK{bcolors.ENDC}"
+ERR=f"{bcolors.FAIL}ERR{bcolors.ENDC}"
+DONE=f"{bcolors.OKGREEN}DONE{bcolors.ENDC}"
+
 pem_key = "lab_okorniienko2026.pem"
 region = 'us-east-1b' # as requested
 ec2 = boto3.resource('ec2', region_name='us-east-1')
 
 def create_instance(instance_name, security_group="default"):
-    print(bcolors.HEADER + f"Creating an instance with name {bcolors.BOLD}{bcolors.OKGREEN}{instance_name}" + bcolors.ENDC)
+    print("╭ " + bcolors.HEADER + f"Creating an instance with name {bcolors.BOLD}{bcolors.OKGREEN}{instance_name}" + bcolors.ENDC)
     try:
         instance = ec2.create_instances(
             ImageId='ami-0f3caa1cf4417e51b',
@@ -59,11 +64,12 @@ def create_instance(instance_name, security_group="default"):
                 ]
         )
         print("├── Waiting until running...")
+        # print(instance)
         instance[0].wait_until_running()
         print("├── Loading...")
         instance[0].load()
-        print(f"└── [ {bcolors.OKGREEN}DONE{bcolors.ENDC} ] Instance created and running on IP: {bcolors.OKBLUE}http://{instance[0].public_ip_address}{bcolors.ENDC}")
-        print(f"\n{bcolors.HEADER}Waiting for the web server to start...{bcolors.ENDC}")
+        print(f"└── [ {DONE} ] Instance created and running on IP: {bcolors.OKBLUE}http://{instance[0].public_ip_address}{bcolors.ENDC}")
+        print(f"\n╭ {bcolors.HEADER}Waiting for the web server to start...{bcolors.ENDC}")
         
         
         # Source - https://stackoverflow.com/a/6169274
@@ -78,11 +84,11 @@ def create_instance(instance_name, security_group="default"):
             except Exception as error:
                 pass
             if timer>59:
-                sys.stdout.write(f"\r└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot connect (waiting time exceeded)\n")
+                sys.stdout.write(f"\r└── [ {ERR} ] Cannot connect (waiting time exceeded)\n")
                 sys.stdout.flush()
                 break
             if status == 200:
-                sys.stdout.write(f"\r└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Connected to the webserver\n")
+                sys.stdout.write(f"\r└── [ {OK} ] Connected to the webserver\n")
                 sys.stdout.flush()
                 break
             sys.stdout.write("\r└── [ %i/60 ] Trying to connect..." % timer)
@@ -94,43 +100,17 @@ def create_instance(instance_name, security_group="default"):
         
         
         webbrowser.open("http://" + instance[0].public_ip_address + "/metadata.html")
-        return instance[0]
+        # https://www.geeksforgeeks.org/python/g-fact-41-multiple-return-values-in-python/
+        return {'obj':instance[0],'status':0}
     except Exception as error:
-        print(f"└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Error creating the instance --> {error}\n" + bcolors.ENDC)
+        print(f"└── [ {ERR} ] Error creating the instance --> {error}\n" + bcolors.ENDC)
+        return {'obj':None,'status':1}
         
     
 if __name__ == "__main__":
-    create_instance("testami1", "assignment1_security_group")
-    # response = requests.get('http://example.com')
-    # print(response.status_code)
-    
-    # Source - https://stackoverflow.com/a/6169274
-# Posted by 6502, modified by community. See post 'Timeline' for change history
-# Retrieved 2026-03-02, License - CC BY-SA 4.0
-    import sys
-    # s="222"
-    # for i, ss in enumerate(s):
-    #     sys.stdout.write("\rDoing thing %i" % i)
-    #     time.sleep(2)
-    #     sys.stdout.flush()
-
-    # status = ""
-    # timer = 0
-    # while(status != 200):
-    #     try:
-    #         r = requests.get(f'http://sdsds.coccm/sdsd/metadata.html')
-    #         status = r.status_code
-    #     except Exception as error:
-    #         pass
-    #     if timer>1:
-    #         sys.stdout.write(f"\r\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot connect (waiting time exceeded)\n")
-    #         sys.stdout.flush()
-    #         break
-    #     if status == 200:
-    #         sys.stdout.write(f"\r\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Connected\n")
-    #         sys.stdout.flush()
-    #         break
-    #     sys.stdout.write("\r\t└── [ %i/60 ] Trying to connect" % timer)
-    #     sys.stdout.flush()
-    #     time.sleep(1)
-    #     timer += 1
+    instance_response=create_instance("testami1", "assignment1_security_group")
+    instance=instance_response['obj']
+    print(instance_response['status'])
+    print(instance)
+    print(instance.id)
+    # monitoring(instance.id)
