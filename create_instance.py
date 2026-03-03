@@ -94,13 +94,13 @@ def create_instance(instance_name, security_group="default"):
         
         
         webbrowser.open("http://" + instance[0].public_ip_address + "/metadata.html")
-        return instance[0].public_ip_address
+        return instance[0]
     except Exception as error:
         print(f"└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Error creating the instance --> {error}\n" + bcolors.ENDC)
         
     
 if __name__ == "__main__":
-    # create_instance("test", "assignment1_security_group")
+    create_instance("testami1", "assignment1_security_group")
     # response = requests.get('http://example.com')
     # print(response.status_code)
     
@@ -114,23 +114,23 @@ if __name__ == "__main__":
     #     time.sleep(2)
     #     sys.stdout.flush()
 
-    status = ""
-    timer = 0
-    while(status != 200):
-        try:
-            r = requests.get(f'http://sdsds.coccm/sdsd/metadata.html')
-            status = r.status_code
-        except Exception as error:
-            pass
-        if timer>1:
-            sys.stdout.write(f"\r\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot connect (waiting time exceeded)\n")
-            sys.stdout.flush()
-            break
-        if status == 200:
-            sys.stdout.write(f"\r\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Connected\n")
-            sys.stdout.flush()
-            break
-        sys.stdout.write("\r\t└── [ %i/60 ] Trying to connect" % timer)
-        sys.stdout.flush()
-        time.sleep(1)
-        timer += 1
+    # status = ""
+    # timer = 0
+    # while(status != 200):
+    #     try:
+    #         r = requests.get(f'http://sdsds.coccm/sdsd/metadata.html')
+    #         status = r.status_code
+    #     except Exception as error:
+    #         pass
+    #     if timer>1:
+    #         sys.stdout.write(f"\r\t└── [ {bcolors.FAIL}ERR{bcolors.ENDC} ] Cannot connect (waiting time exceeded)\n")
+    #         sys.stdout.flush()
+    #         break
+    #     if status == 200:
+    #         sys.stdout.write(f"\r\t└── [ {bcolors.OKGREEN}OK{bcolors.ENDC} ] Connected\n")
+    #         sys.stdout.flush()
+    #         break
+    #     sys.stdout.write("\r\t└── [ %i/60 ] Trying to connect" % timer)
+    #     sys.stdout.flush()
+    #     time.sleep(1)
+    #     timer += 1

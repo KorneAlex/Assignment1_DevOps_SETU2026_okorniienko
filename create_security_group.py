@@ -8,7 +8,7 @@ from helpers import bcolors
 ec2 = boto3.client("ec2")
 
 def create_security_group(name, description):
-    print(bcolors.HEADER + f"Creating a security group with name {bcolors.BOLD}{bcolors.OKGREEN}{name}" + bcolors.ENDC)
+    print(bcolors.HEADER + f"\nCreating a security group with name {bcolors.BOLD}{bcolors.OKGREEN}{name}" + bcolors.ENDC)
     try:
         response = ec2.create_security_group(
             Description=description,

@@ -4,25 +4,33 @@ import subprocess
 from create_security_group import create_security_group
 from create_instance import create_instance
 from create_bucket import create_bucket
+from create_ami import create_ami
 from helpers import bcolors
 
 ec2 = boto3.client("ec2")
+pem_key = str(subprocess.run("ls | grep .pem", shell=True, capture_output=True, text=True).stdout[:-1])
+
+# User variables
+monitoring_file = "monitoring.sh"
 instance_name="assignment1_okorniienko"
 security_group="assignment1_security_group"
 security_group_description="The security group for the assignment1"
-#CompletedProcess(args='ls | grep .pem', returncode=0, stdout='lab_okorniienko2026.pem\n', stderr='') // stdout[:-1] gets actual filename
-pem_key = str(subprocess.run("ls | grep .pem", shell=True, capture_output=True, text=True).stdout[:-1])
-monitoring_file = "monitoring.sh"
+image_name="assignment1_okorniienko_image"
+image_description="Image of the assignment1_okorniienko instance"
 
+#CompletedProcess(args='ls | grep .pem', returncode=0, stdout='lab_okorniienko2026.pem\n', stderr='') // stdout[:-1] gets actual filename
 # try:
 #     response = ec2.delete_security_group(
 #         GroupName=security_group,
 #     )
 # except Exception as error:
 #     print(f"Cannot delete the security group with name {security_group}")
+
 create_security_group(security_group, security_group_description)
-instance_url = create_instance(instance_name, security_group)
+instance = create_instance(instance_name, security_group)
+instance_url = instance.public_ip_address
 bucket_url = create_bucket()
+create_ami(instance.id, image_name, image_description)
 
 with open('okorniienko-websites.txt', 'w') as file:
     file.write("Instance Public IP:\t" + "http://" + instance_url + "\n")
@@ -30,7 +38,7 @@ with open('okorniienko-websites.txt', 'w') as file:
     file.write("Bucket URL:\t\t\t" + bucket_url)
     
 #https://superuser.com/questions/125324/how-can-i-avoid-sshs-host-verification-for-known-hosts
-print(f"{bcolors.HEADER}Monitoring tool{bcolors.ENDC}")
+print(f"\n{bcolors.HEADER}Monitoring tool{bcolors.ENDC}")
 try:
     print(f"├── Coping file {monitoring_file} to {bcolors.OKBLUE}{instance_url}{bcolors.ENDC}")
     copy_monitoring_script = subprocess.run(f"scp -i {pem_key}  -o 'StrictHostKeyChecking no' {monitoring_file} ec2-user@{instance_url}:.", shell=True, capture_output=True, text=True)

@@ -108,7 +108,7 @@ def create_bucket():
                 print(f"[ {bcolors.FAIL}ERR{bcolors.ENDC} ] Uploading {file['name']} --> ", error)
                 
         website_url = "http://%s.s3-website-%s.amazonaws.com" % (bucket_name, boto3.Session().region_name)
-        print(f"└── [ {bcolors.OKGREEN}DONE{bcolors.ENDC} ] The bucket has been created and configured for the website hosting. \nAccess it at: {bcolors.OKBLUE}" + website_url + f"{bcolors.ENDC}\n")
+        print(f"└── [ {bcolors.OKGREEN}DONE{bcolors.ENDC} ] The bucket has been created and configured for the website hosting. \nAccess it at: {bcolors.OKBLUE}" + website_url + f"{bcolors.ENDC}")
         webbrowser.open(website_url)
         return website_url
     
